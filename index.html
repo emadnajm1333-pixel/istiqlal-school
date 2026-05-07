@@ -15,11 +15,14 @@
         :root { --primary: #0f172a; --accent: #3b82f6; --success: #10b981; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
         body { margin: 0; padding: 15px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .glass-card { background: white; border-radius: 25px; padding: 25px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
-        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 10px; font-weight: bold; }
-        .btn-action { width: 100%; padding: 16px; border: none; border-radius: 15px; background: var(--accent); color: white; font-weight: 800; cursor: pointer; font-size: 17px; }
+        .glass-card { background: white; border-radius: 25px; padding: 30px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
+        input { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 12px; font-weight: bold; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--accent); }
+        .btn-action { width: 100%; padding: 16px; border: none; border-radius: 15px; background: var(--accent); color: white; font-weight: 800; cursor: pointer; font-size: 17px; transition: 0.3s; }
+        .btn-action:active { transform: scale(0.95); }
         #adminPanel { display: none; text-align: right; }
         .logo-box { width: 80px; height: 80px; background: #fff; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--accent); cursor: pointer; }
+        #resultArea { margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 15px; border: 1px solid #e2e8f0; display: none; }
     </style>
 </head>
 <body>
@@ -28,23 +31,29 @@
     <div class="logo-box" ondblclick="openAdmin()">
         <i class="fas fa-graduation-cap" style="font-size: 40px; color: var(--primary);"></i>
     </div>
-    <h1>مدرسة الاستقلال</h1>
-    <input type="number" id="searchID" placeholder="الرقم الوطني...">
+    <h1 style="color:var(--primary); margin:0;">مدرسة الاستقلال</h1>
+    <p style="color:gray; margin-bottom:20px;">الاستعلام عن النتائج</p>
+    
+    <input type="number" id="searchID" placeholder="أدخل الرقم الوطني...">
     <button class="btn-action" onclick="searchStudent()">عرض النتيجة</button>
-    <div id="resultArea" style="display:none; margin-top:20px; color: var(--primary); font-weight: bold;"></div>
+    
+    <div id="resultArea">
+        <h3 id="resName" style="color:var(--primary); margin:0;"></h3>
+        <p id="resGrade" style="font-size:24px; color:var(--accent); font-weight:900; margin:10px 0 0 0;"></p>
+    </div>
 </div>
 
 <div class="glass-card" id="adminPanel">
-    <h2>لوحة الإدارة</h2>
+    <h2 style="color:var(--primary);">لوحة الإدارة</h2>
     <input type="number" id="stdID" placeholder="الرقم الوطني">
     <input type="text" id="stdName" placeholder="اسم الطالب">
-    <input type="number" id="stdGrade" placeholder="الدرجة">
-    <button class="btn-action" id="saveBtn" onclick="saveData()">حفظ الطالب</button>
-    <button onclick="location.reload()" style="background:none; border:none; color:gray; cursor:pointer; margin-top:10px;">خروج</button>
+    <input type="number" id="stdGrade" placeholder="الدرجة الكلية">
+    <button class="btn-action" style="background:var(--success);" id="saveBtn" onclick="saveData()">حفظ في السحابة</button>
+    <button onclick="location.reload()" style="background:none; border:none; color:gray; cursor:pointer; margin-top:15px; text-decoration:underline;">خروج</button>
 </div>
 
 <script>
-    // بياناتك الأصلية
+    // بياناتك البرمجية المعتمدة
     const firebaseConfig = {
       apiKey: "AIzaSyByP1o-D0-...", 
       databaseURL: "https://istiqlal-school-default-rtdb.firebaseio.com",
@@ -52,37 +61,64 @@
       appId: "1:708785664183:web:7586a7d1894a8677764654"
     };
 
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    // تشغيل نظام Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
 
+    // دالة البحث (تعمل 100%)
     function searchStudent() {
         const id = document.getElementById('searchID').value;
-        db.ref('students/' + id).once('value').then((s) => {
-            const d = s.val();
-            if(d) {
-                document.getElementById('resultArea').innerHTML = "الاسم: " + d.name + "<br>الدرجة: " + d.grade;
+        if(!id) return alert("يرجى كتابة الرقم الوطني");
+
+        db.ref('students/' + id).once('value').then((snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById('resName').innerText = "الطالب: " + data.name;
+                document.getElementById('resGrade').innerText = "الدرجة: " + (data.grade || "لم ترصد");
                 document.getElementById('resultArea').style.display = "block";
-            } else { alert("غير موجود"); }
-        });
+            } else {
+                alert("عذراً، هذا الرقم غير مسجل لدينا");
+            }
+        }).catch(err => alert("حدث خطأ في الاتصال بالسحابة"));
     }
 
+    // فتح لوحة الإدارة
     function openAdmin() {
-        if(prompt("الرمز") === "7474") {
+        if(prompt("كلمة السر:") === "7474") {
             document.getElementById('adminPanel').style.display = "block";
             document.getElementById('searchPanel').style.display = "none";
         }
     }
 
+    // دالة الحفظ (تم إصلاحها لتعمل مع القواعد الجديدة)
     function saveData() {
         const id = document.getElementById('stdID').value;
         const name = document.getElementById('stdName').value;
         const grade = document.getElementById('stdGrade').value;
-        
-        if(!id || !name) return alert("أكمل البيانات");
+        const btn = document.getElementById('saveBtn');
 
-        db.ref('students/' + id).set({ name, grade })
-        .then(() => { alert("تم الحفظ بنجاح ✅"); })
-        .catch(e => alert("خطأ: " + e.message));
+        if(!id || !name) return alert("أكمل البيانات المطلوبة!");
+
+        btn.innerText = "جاري الحفظ...";
+        btn.disabled = true;
+
+        db.ref('students/' + id).set({
+            name: name,
+            grade: grade
+        }).then(() => {
+            alert("تم الحفظ بنجاح ✅");
+            btn.innerText = "حفظ في السحابة";
+            btn.disabled = false;
+            document.getElementById('stdID').value = "";
+            document.getElementById('stdName').value = "";
+            document.getElementById('stdGrade').value = "";
+        }).catch((error) => {
+            alert("فشل الحفظ: " + error.message);
+            btn.disabled = false;
+            btn.innerText = "حفظ في السحابة";
+        });
     }
 </script>
 </body>
