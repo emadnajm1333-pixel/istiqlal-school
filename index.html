@@ -3,102 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة مدرسة الاستقلال - الإدارة الذكية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>بوابة مدرسة الاستقلال الإلكترونية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --main: #1e293b; --accent: #2563eb; --gold: #b45309; --success: #10b981; }
-        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: 0.3s; }
-        body { margin: 0; padding: 10px; background: #f8fafc; min-height: 100vh; display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 600px; }
-        .card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; margin-bottom: 20px; }
-        .logo-btn { width: 80px; height: 80px; background: #fff; border-radius: 20px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--accent); cursor: pointer; }
-        .logo-btn i { font-size: 40px; color: var(--accent); }
-        h1 { font-size: 24px; color: var(--main); margin: 0; font-weight: 900; }
-        
-        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 15px; outline: none; font-weight: 700; margin-bottom: 10px; }
-        .btn-search { width: 100%; padding: 15px; border: none; border-radius: 15px; background: var(--accent); color: white; font-weight: 800; cursor: pointer; }
-        
-        #resultArea { display: none; margin-top: 25px; text-align: right; }
-        .res-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .res-table th { background: #f1f5f9; padding: 10px; font-size: 12px; }
-        .res-table td { padding: 12px 5px; border-bottom: 1px solid #f1f5f9; text-align: center; font-weight: 700; }
-        .total-box { background: #fef3c7; color: var(--gold); padding: 3px 8px; border-radius: 6px; }
+        :root {
+            --primary: #0f172a;
+            --accent: #3b82f6;
+            --gold: #d97706;
+            --bg: #f1f5f9;
+        }
 
-        /* ستايل الإدارة الخاص بك */
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            margin: 0; padding: 15px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .main-wrapper { width: 100%; max-width: 550px; animation: fadeIn 0.8s ease-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 35px 25px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .header-section { margin-bottom: 30px; }
+        
+        .logo-box {
+            width: 90px; height: 90px; background: white;
+            border-radius: 24px; margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            cursor: pointer; border: 3px solid var(--accent);
+        }
+        .logo-box i { font-size: 45px; color: var(--primary); }
+
+        h1 { color: var(--primary); font-weight: 900; font-size: 26px; margin: 0; letter-spacing: -0.5px; }
+        .sub-title { color: #64748b; font-size: 14px; margin-top: 5px; font-weight: 600; }
+
+        .search-area { margin-top: 30px; position: relative; }
+        input[type="number"], input[type="text"], select {
+            width: 100%; padding: 16px 20px;
+            border-radius: 18px; border: 2px solid #e2e8f0;
+            font-size: 16px; font-weight: 700; outline: none;
+            background: #f8fafc; color: var(--primary);
+        }
+        input:focus { border-color: var(--accent); background: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+
+        .btn-action {
+            width: 100%; padding: 16px; border: none; border-radius: 18px;
+            background: var(--accent); color: white; font-weight: 800; font-size: 17px;
+            cursor: pointer; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4); }
+
+        /* ستايل عرض النتيجة */
+        #resultArea { display: none; margin-top: 30px; border-top: 2px dashed #e2e8f0; padding-top: 25px; }
+        .std-header { background: var(--primary); color: white; padding: 15px; border-radius: 15px; font-weight: 700; margin-bottom: 20px; font-size: 15px; }
+        
+        .grade-item {
+            background: white; border: 1px solid #eef2f6; border-radius: 18px;
+            padding: 15px; margin-bottom: 12px; display: flex; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .subj-name { flex: 1; text-align: right; font-weight: 800; color: var(--primary); font-size: 15px; }
+        .grade-details { display: flex; gap: 10px; font-size: 12px; color: #64748b; margin-left: 15px; }
+        .total-badge {
+            background: #fff7ed; color: var(--gold);
+            width: 45px; height: 45px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 17px; border: 1px solid #ffedd5;
+        }
+
+        /* الإدارة */
         #adminPanel { display: none; text-align: right; }
-        .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        .filter-tabs { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin: 15px 0; }
-        .filter-btn { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--accent); background: white; color: var(--accent); font-weight: 700; cursor: pointer; font-size: 12px; }
-        .filter-btn.active { background: var(--accent); color: white; }
-        .std-list-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-        .std-list-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: right; }
-        .btn-edit { background: var(--gold); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
-        .admin-search-box { background: #fffbeb; border: 2px solid var(--gold); padding: 12px; border-radius: 15px; margin-bottom: 15px; }
+        .grid-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .admin-search-wrap { background: #f0f9ff; border: 1px solid #bae6fd; padding: 15px; border-radius: 20px; margin: 20px 0; }
+        .edit-btn { background: var(--gold); color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="card" id="searchPanel">
-        <div class="logo-btn" ondblclick="openAdmin()">
-            <i class="fas fa-graduation-cap"></i>
+<div class="main-wrapper">
+    <div class="glass-card" id="searchPanel">
+        <div class="header-section">
+            <div class="logo-box" ondblclick="openAdmin()">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1>مدرسة الاستقلال</h1>
+            <div class="sub-title">منظومة النتائج والتقارير المعتمدة</div>
         </div>
-        <h1>مدرسة الاستقلال</h1>
-        <p style="font-size:13px; color:gray; margin-bottom:20px">استعلم عن نتيجتك بالرقم الوطني</p>
-        <input type="number" id="searchID" placeholder="أدخل الرقم الوطني فقط...">
-        <button class="btn-search" onclick="searchStudent()">عرض النتيجة</button>
+
+        <div class="search-area">
+            <input type="number" id="searchID" placeholder="أدخل الرقم الوطني للطالب...">
+            <button class="btn-action" onclick="searchStudent()">عرض النتيجة الآن</button>
+        </div>
 
         <div id="resultArea">
-            <div id="resName" style="background:var(--main); color:white; padding:10px; border-radius:10px; margin-bottom:15px; font-weight:700"></div>
-            <table class="res-table">
-                <thead><tr><th style="text-align:right">المادة</th><th>أعمال</th><th>إمتحان</th><th>مجموع</th></tr></thead>
-                <tbody id="resGrades"></tbody>
-            </table>
+            <div class="std-header" id="resName"></div>
+            <div id="resGrades"></div>
         </div>
     </div>
 
-    <div id="adminPanel" class="card">
-        <h2 style="margin:0 0 20px 0; color:var(--main)">لوحة التحكم المركزية</h2>
+    <div class="glass-card" id="adminPanel">
+        <h2 style="color: var(--primary); margin-top: 0;">لوحة التحكم والفرز</h2>
         
         <input type="number" id="stdID" placeholder="الرقم الوطني">
-        <input type="text" id="stdName" placeholder="اسم الطالب بالكامل">
+        <input type="text" id="stdName" placeholder="اسم الطالب الكامل">
         <select id="stdLevel">
-            <option value="">-- اختر السنة الدراسية --</option>
+            <option value="">-- السنة الدراسية --</option>
             <option value="سادس">سادس</option><option value="سابع">سابع</option>
             <option value="ثامن">ثامن</option><option value="تاسع">تاسع</option>
         </select>
-        <div id="gradesInputs">
-            <div class="grid-3"><input type="text" placeholder="المادة" class="subject"><input type="number" placeholder="أعمال" class="work"><input type="number" placeholder="إمتحان" class="exam"></div>
-        </div>
-        <button onclick="addRow()" style="width:100%; padding:10px; margin-bottom:10px; background:#f1f5f9; border:none; border-radius:10px; font-weight:700">+ إضافة مادة</button>
-        <button onclick="saveData()" style="width:100%; padding:15px; background:var(--success); color:white; border:none; border-radius:12px; font-weight:900;">حفظ الطالب</button>
         
-        <div style="margin-top:30px; border-top:2px solid #eee; padding-top:20px">
-            <h3 style="margin:0 0 10px 0">إدارة وتعديل الطلاب</h3>
-            <div class="admin-search-box">
-                <i class="fas fa-search" style="color:var(--gold)"></i>
-                <input type="text" id="adminSearchInput" placeholder="ابحث هنا بالاسم لتعديل أي طالب..." oninput="filterAdminList(this.value)" style="border:none; background:none; margin-bottom:0; padding:5px">
+        <div id="gradesInputs">
+            <div class="grid-row">
+                <input type="text" placeholder="المادة" class="subject">
+                <input type="number" placeholder="أعمال" class="work">
+                <input type="number" placeholder="امتحان" class="exam">
             </div>
-
-            <div class="filter-tabs">
-                <button class="filter-btn active" onclick="filterByLevel('الكل', this)">الكل</button>
-                <button class="filter-btn" onclick="filterByLevel('سادس', this)">سادس</button>
-                <button class="filter-btn" onclick="filterByLevel('سابع', this)">سابع</button>
-                <button class="filter-btn" onclick="filterByLevel('ثامن', this)">ثامن</button>
-                <button class="filter-btn" onclick="filterByLevel('تاسع', this)">تاسع</button>
-            </div>
-            <table class="std-list-table"><tbody id="adminListBody"></tbody></table>
         </div>
-        <button onclick="closeAdmin()" style="margin-top:20px; color:gray; background:none; border:none; text-decoration:underline; cursor:pointer">خروج</button>
+        
+        <button onclick="addRow()" style="width:100%; padding:10px; margin-bottom:10px; background:#e2e8f0; border:none; border-radius:12px; font-weight:700">+ مادة إضافية</button>
+        <button class="btn-action" style="background:var(--success); margin-bottom: 20px;" onclick="saveData()">حفظ الطالب في المنظومة</button>
+        
+        <div class="admin-search-wrap">
+            <h4 style="margin:0 0 10px 0">بحث وتعديل سريع:</h4>
+            <input type="text" id="adminSearchInput" placeholder="اكتب الاسم للبحث..." oninput="refreshAdminList('الكل', this.value)">
+            <div id="adminListContainer" style="max-height: 200px; overflow-y: auto; margin-top: 10px;">
+                <table style="width:100%; border-collapse: collapse;" id="adminTable">
+                    <tbody id="adminListBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" style="background:none; border:none; color:gray; text-decoration:underline; cursor:pointer">خروج آمن</button>
     </div>
 </div>
 
 <script>
-    // --- بيانات Firebase (ضع بياناتك هنا) ---
+    // --- بيانات Firebase (تأكد من وضع بياناتك هنا) ---
     const firebaseConfig = {
       apiKey: "AIzaSyC...", 
       databaseURL: "https://istiqlal-school-default-rtdb.firebaseio.com",
@@ -108,92 +165,85 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let localData = {};
-
-    // جلب البيانات للخلفية
-    db.ref('students').on('value', (s) => { localData = s.val() || {}; });
-
-    // بحث الطالب (بالرقم فقط)
     function searchStudent() {
         const id = document.getElementById('searchID').value;
-        const data = localData[id];
-        if(data) {
-            document.getElementById('resName').innerText = "الطالب: " + data.name + " (" + (data.level || '') + ")";
-            let rows = "";
-            data.grades.forEach(g => {
-                const total = parseInt(g.work || 0) + parseInt(g.exam || 0);
-                rows += `<tr><td style="text-align:right">${g.subject}</td><td>${g.work}</td><td>${g.exam}</td><td><span class="total-box">${total}</span></td></tr>`;
-            });
-            document.getElementById('resGrades').innerHTML = rows;
-            document.getElementById('resultArea').style.display = "block";
-        } else { alert("الرقم الوطني غير مسجل"); }
+        if(!id) return;
+        db.ref('students/' + id).once('value', (s) => {
+            const data = s.val();
+            if(data) {
+                document.getElementById('resName').innerHTML = `<i class="fas fa-user"></i> الطالب: ${data.name}`;
+                let html = "";
+                data.grades.forEach(g => {
+                    const total = parseInt(g.work || 0) + parseInt(g.exam || 0);
+                    html += `
+                    <div class="grade-item">
+                        <div class="subj-name">${g.subject}</div>
+                        <div class="grade-details">
+                            <span>أعمال: ${g.work}</span>
+                            <span>امتحان: ${g.exam}</span>
+                        </div>
+                        <div class="total-badge">${total}</div>
+                    </div>`;
+                });
+                document.getElementById('resGrades').innerHTML = html;
+                document.getElementById('resultArea').style.display = "block";
+            } else { alert("عذراً، الرقم غير مسجل لدينا."); }
+        });
     }
 
     function openAdmin() {
-        if(prompt("كلمة سر الإدارة:") === "74742000") {
+        if(prompt("الرمز السري:") === "74742000") {
             document.getElementById('adminPanel').style.display = "block";
             document.getElementById('searchPanel').style.display = "none";
-            renderAdminList('الكل');
+            refreshAdminList('الكل');
         }
-    }
-
-    function filterByLevel(level, btn) {
-        if(btn) {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-        renderAdminList(level);
-    }
-
-    function filterAdminList(name) {
-        renderAdminList('الكل', name);
-    }
-
-    function renderAdminList(level, searchName = "") {
-        let html = "";
-        for(let id in localData) {
-            const s = localData[id];
-            const matchLevel = (level === 'الكل' || s.level === level);
-            const matchName = (searchName === "" || s.name.includes(searchName));
-            if(matchLevel && matchName) {
-                html += `<tr><td>${s.name}</td><td style="color:gray; font-size:11px">${id}</td><td><button class="btn-edit" onclick="editExisting('${id}')">تعديل</button></td></tr>`;
-            }
-        }
-        document.getElementById('adminListBody').innerHTML = html || "<tr><td>لا يوجد نتائج</td></tr>";
-    }
-
-    function editExisting(id) {
-        const data = localData[id];
-        document.getElementById('stdID').value = id;
-        document.getElementById('stdName').value = data.name;
-        document.getElementById('stdLevel').value = data.level || "";
-        document.getElementById('gradesInputs').innerHTML = "";
-        data.grades.forEach(g => {
-            const div = document.createElement('div');
-            div.className = "grid-3";
-            div.innerHTML = `<input type="text" value="${g.subject}" class="subject"><input type="number" value="${g.work}" class="work"><input type="number" value="${g.exam}" class="exam">`;
-            document.getElementById('gradesInputs').appendChild(div);
-        });
-        window.scrollTo(0,0);
     }
 
     function addRow() {
         const div = document.createElement('div');
-        div.className = "grid-3";
-        div.innerHTML = `<input type="text" placeholder="المادة" class="subject"><input type="number" placeholder="أعمال" class="work"><input type="number" placeholder="إمتحان" class="exam">`;
+        div.className = "grid-row";
+        div.innerHTML = `<input type="text" placeholder="المادة" class="subject"><input type="number" placeholder="أعمال" class="work"><input type="number" placeholder="امتحان" class="exam">`;
         document.getElementById('gradesInputs').appendChild(div);
     }
 
     function saveData() {
         const id = document.getElementById('stdID').value, name = document.getElementById('stdName').value, level = document.getElementById('stdLevel').value;
         const subs = document.querySelectorAll('.subject'), works = document.querySelectorAll('.work'), exams = document.querySelectorAll('.exam');
+        if(!id || !name || !level) { alert("يرجى إكمال الحقول الرئيسية!"); return; }
         let grades = [];
-        subs.forEach((s, i) => { if(s.value) grades.push({ subject: s.value, work: works[i].value, exam: exams[i].value }); });
-        if(!id || !name || !level) return alert("يرجى إكمال البيانات");
-        db.ref('students/' + id).set({ name, level, grades }, () => { alert("تم الحفظ بنجاح ✅"); });
+        subs.forEach((s, i) => { if(s.value) grades.push({ subject: s.value, work: works[i].value || 0, exam: exams[i].value || 0 }); });
+        db.ref('students/' + id).set({ name, level, grades }, () => { alert("تم حفظ الطالب بنجاح! ✅"); refreshAdminList('الكل'); });
     }
 
-    function closeAdmin() { location.reload(); }
+    function refreshAdminList(level, filter = "") {
+        db.ref('students').once('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            let html = "";
+            for(let id in data) {
+                if(data[id].name.includes(filter)) {
+                    html += `<tr style="border-bottom:1px solid #eee"><td style="padding:10px; font-size:13px">${data[id].name}</td><td><button class="edit-btn" onclick="editStd('${id}')">تعديل</button></td></tr>`;
+                }
+            }
+            document.getElementById('adminListBody').innerHTML = html;
+        });
+    }
+
+    function editStd(id) {
+        db.ref('students/' + id).once('value', (s) => {
+            const data = s.val();
+            document.getElementById('stdID').value = id;
+            document.getElementById('stdName').value = data.name;
+            document.getElementById('stdLevel').value = data.level || "";
+            document.getElementById('gradesInputs').innerHTML = "";
+            data.grades.forEach(g => {
+                const div = document.createElement('div');
+                div.className = "grid-row";
+                div.innerHTML = `<input type="text" value="${g.subject}" class="subject"><input type="number" value="${g.work}" class="work"><input type="number" value="${g.exam}" class="exam">`;
+                document.getElementById('gradesInputs').appendChild(div);
+            });
+            window.scrollTo(0,0);
+        });
+    }
 </script>
 </body>
 </html>
