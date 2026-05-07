@@ -5,23 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منظومة مدرسة الاستقلال</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root { --primary: #0f172a; --accent: #3b82f6; --success: #10b981; }
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: 0.3s; }
         body { margin: 0; padding: 15px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; display: flex; justify-content: center; }
-        .glass-card { background: rgba(255,255,255,0.98); border-radius: 25px; padding: 25px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
+        .glass-card { background: white; border-radius: 25px; padding: 25px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); text-align: center; }
         input, select { width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 10px; font-weight: bold; font-size: 15px; outline: none; }
-        input:focus { border-color: var(--accent); }
         .btn-action { width: 100%; padding: 16px; border: none; border-radius: 15px; background: var(--accent); color: white; font-weight: 800; cursor: pointer; font-size: 17px; }
         .grid-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         #adminPanel { display: none; text-align: right; }
         .logo-box { width: 80px; height: 80px; background: #fff; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--accent); cursor: pointer; }
-        .admin-search-wrap { background: #f0f9ff; padding: 15px; border-radius: 20px; margin-top: 20px; border: 1px solid #bae6fd; }
-        .edit-btn { background: #b45309; color: white; border: none; border-radius: 8px; padding: 5px 12px; cursor: pointer; font-weight: 700; }
+        .result-box { background:#f8fafc; padding:12px; border-radius:12px; margin-bottom:8px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; }
     </style>
 </head>
 <body>
@@ -31,18 +29,18 @@
         <i class="fas fa-graduation-cap" style="font-size: 40px; color: var(--primary);"></i>
     </div>
     <h1 style="color:var(--primary); margin:0 0 10px 0;">مدرسة الاستقلال</h1>
-    <p style="color:#64748b; font-size:14px; margin-bottom:20px;">الاستعلام عن النتائج والتقارير</p>
+    <p style="color:#64748b; font-size:14px; margin-bottom:20px;">الاستعلام عن النتائج</p>
     <input type="number" id="searchID" placeholder="أدخل الرقم الوطني...">
     <button class="btn-action" onclick="searchStudent()">عرض النتيجة الآن</button>
     
     <div id="resultArea" style="display:none; margin-top:25px; text-align:right;">
-        <div id="resName" style="background:var(--primary); color:white; padding:12px; border-radius:12px; font-weight:700; margin-bottom:15px;"></div>
+        <div id="resName" style="background:var(--primary); color:white; padding:12px; border-radius:12px; font-weight:700; margin-bottom:15px; text-align:center;"></div>
         <div id="resGrades"></div>
     </div>
 </div>
 
 <div class="glass-card" id="adminPanel">
-    <h2 style="color:var(--primary); margin-top:0;">لوحة التحكم والفرز</h2>
+    <h2 style="color:var(--primary); margin-top:0;">لوحة التحكم</h2>
     <input type="number" id="stdID" placeholder="الرقم الوطني">
     <input type="text" id="stdName" placeholder="اسم الطالب">
     <select id="stdLevel">
@@ -59,54 +57,62 @@
         </div>
     </div>
     
-    <button onclick="addRow()" style="width:100%; padding:10px; margin-bottom:15px; background:#f1f5f9; border:none; border-radius:12px; font-weight:700; cursor:pointer;">+ إضافة مادة أخرى</button>
+    <button onclick="addRow()" style="width:100%; padding:10px; margin-bottom:15px; background:#f1f5f9; border:none; border-radius:12px; font-weight:700; cursor:pointer;">+ إضافة مادة</button>
     <button class="btn-action" style="background:var(--success);" id="saveBtn" onclick="saveData()">حفظ الطالب في السحابة</button>
     
-    <div class="admin-search-wrap">
-        <input type="text" placeholder="بحث بالاسم للتعديل..." oninput="refreshAdminList(this.value)" style="margin-bottom:10px; padding:10px;">
-        <div id="adminListBody" style="max-height:150px; overflow-y:auto; text-align:right;"></div>
+    <div style="margin-top:20px; background:#f0f9ff; padding:15px; border-radius:20px;">
+        <input type="text" placeholder="بحث بالاسم للتعديل..." oninput="refreshList(this.value)">
+        <div id="adminListBody" style="max-height:150px; overflow-y:auto; margin-top:10px;"></div>
     </div>
     
     <button onclick="location.reload()" style="background:none; border:none; color:gray; text-decoration:underline; cursor:pointer; margin-top:15px;">خروج آمن</button>
 </div>
 
 <script>
-    // --- بيانات Firebase الجاهزة لربط مشروعك ---
+    // الإعدادات الخاصة بك
     const firebaseConfig = {
-      apiKey: "AIzaSyByP1o-D0...", // تم وضع بياناتك المكتشفة هنا
+      apiKey: "AIzaSyByP1o-D0-...", 
       databaseURL: "https://istiqlal-school-default-rtdb.firebaseio.com",
       projectId: "istiqlal-school",
       appId: "1:708785664183:web:7586a7d1894a8677764654"
     };
-    firebase.initializeApp(firebaseConfig);
+
+    // التأكد من تهيئة Firebase لمرة واحدة فقط
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const db = firebase.database();
 
+    // وظيفة البحث (عرض النتيجة)
     function searchStudent() {
         const id = document.getElementById('searchID').value;
-        if(!id) return;
-        db.ref('students/' + id).once('value', (s) => {
-            const data = s.val();
+        if(!id) { alert("من فضلك أدخل الرقم الوطني"); return; }
+        
+        db.ref('students/' + id).once('value').then((snapshot) => {
+            const data = snapshot.val();
             if(data) {
                 document.getElementById('resName').innerText = "الطالب: " + data.name;
                 let h = "";
                 data.grades.forEach(g => {
-                    const t = parseInt(g.work || 0) + parseInt(g.exam || 0);
-                    h += `<div style="background:#f8fafc; padding:12px; border-radius:12px; margin-bottom:8px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-                            <div><b>${g.subject}</b><br><small style="color:gray;">أعمال: ${g.work} | إمتحان: ${g.exam}</small></div>
+                    const t = (parseInt(g.work) || 0) + (parseInt(g.exam) || 0);
+                    h += `<div class="result-box">
+                            <div><b>${g.subject}</b><br><small>أعمال: ${g.work} | إمتحان: ${g.exam}</small></div>
                             <div style="background:#fef3c7; color:#b45309; padding:5px 10px; border-radius:8px; font-weight:900;">${t}</div>
                           </div>`;
                 });
                 document.getElementById('resGrades').innerHTML = h;
                 document.getElementById('resultArea').style.display = "block";
-            } else { alert("الرقم الوطني غير مسجل."); }
-        });
+            } else {
+                alert("الرقم الوطني غير صحيح أو غير مسجل!");
+            }
+        }).catch(err => alert("حدث خطأ أثناء البحث: " + err.message));
     }
 
     function openAdmin() {
-        if(prompt("كلمة سر الإدارة:") === "74742000") {
+        if(prompt("كلمة السر:") === "74742000") {
             document.getElementById('adminPanel').style.display = "block";
             document.getElementById('searchPanel').style.display = "none";
-            refreshAdminList("");
+            refreshList("");
         }
     }
 
@@ -117,56 +123,47 @@
         document.getElementById('gradesInputs').appendChild(div);
     }
 
+    // وظيفة الحفظ (الإرسال للسحابة)
     function saveData() {
         const id = document.getElementById('stdID').value;
         const name = document.getElementById('stdName').value;
         const level = document.getElementById('stdLevel').value;
         const subs = document.querySelectorAll('.subject'), works = document.querySelectorAll('.work'), exams = document.querySelectorAll('.exam');
         
-        if(!id || !name || !level) {
-            alert("خطأ: يرجى كتابة الرقم والاسم واختيار السنة!");
-            return;
-        }
+        if(!id || !name || !level) { alert("أكمل البيانات أولاً!"); return; }
 
         let gradesArr = [];
         subs.forEach((s, i) => {
-            if(s.value) {
-                gradesArr.push({
-                    subject: s.value,
-                    work: works[i].value || 0,
-                    exam: exams[i].value || 0
-                });
-            }
+            if(s.value) gradesArr.push({ subject: s.value, work: works[i].value || 0, exam: exams[i].value || 0 });
         });
 
         const btn = document.getElementById('saveBtn');
         btn.innerText = "جاري الحفظ...";
         btn.disabled = true;
 
-        db.ref('students/' + id).set({
-            name: name,
-            level: level,
-            grades: gradesArr
-        }).then(() => {
-            alert("تم حفظ بيانات " + name + " بنجاح ✅");
+        db.ref('students/' + id).set({ name, level, grades: gradesArr })
+        .then(() => {
+            alert("تم الحفظ بنجاح! ✅");
             btn.innerText = "حفظ الطالب في السحابة";
             btn.disabled = false;
-            refreshAdminList("");
-        }).catch((error) => {
-            alert("فشل الحفظ: " + error.message);
+            refreshList("");
+        })
+        .catch((e) => {
+            alert("خطأ في الحفظ: " + e.message);
             btn.disabled = false;
+            btn.innerText = "حفظ الطالب في السحابة";
         });
     }
 
-    function refreshAdminList(filter) {
+    function refreshList(f) {
         db.ref('students').once('value', (snapshot) => {
             const data = snapshot.val() || {};
             let h = "";
             for(let id in data) {
-                if(data[id].name.includes(filter)) {
-                    h += `<div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                            <span>${data[id].name} <small style="color:gray;">(${data[id].level})</small></span>
-                            <button onclick="editStd('${id}')" class="edit-btn">تعديل</button>
+                if(data[id].name.includes(f)) {
+                    h += `<div style="padding:8px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
+                            <span>${data[id].name}</span>
+                            <button onclick="editStd('${id}')" style="background:#b45309; color:white; border:none; border-radius:5px; padding:3px 8px; cursor:pointer;">تعديل</button>
                           </div>`;
                 }
             }
@@ -187,7 +184,7 @@
                 div.innerHTML = `<input type="text" value="${g.subject}" class="subject"><input type="number" value="${g.work}" class="work"><input type="number" value="${g.exam}" class="exam">`;
                 document.getElementById('gradesInputs').appendChild(div);
             });
-            window.scrollTo({top: 0, behavior: 'smooth'});
+            window.scrollTo(0,0);
         });
     }
 </script>
